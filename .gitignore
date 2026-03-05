@@ -22,10 +22,15 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Secrets & config overrides
-appsettings.Development.json
-appsettings.Local.json
+# ========================
+# Secrets & config (TUYET DOI KHONG COMMIT)
+# ========================
+appsettings.json
+appsettings.*.json
 secrets.json
+*.env
+.env
+.env.*
 
 # Logs
 Logs/
@@ -44,7 +49,7 @@ dist/
 .cache/
 
 # Environment files with secrets
-Frontend/employee-management/src/environments/environment.prod.ts
+src/environments/environment*.ts
 
 # ========================
 # OS
@@ -54,9 +59,12 @@ Thumbs.db
 desktop.ini
 
 # ========================
-# IDE
+# IDE & Tools
 # ========================
 .idea/
+.vs/
+.claude/
+.qoder/
 *.swp
 *.swo
 
