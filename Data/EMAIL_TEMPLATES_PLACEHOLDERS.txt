@@ -1,0 +1,139 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                    DANH SÁCH PLACEHOLDERS - EMAIL TEMPLATES                      ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+==================================================================================
+1. TỔNG QUAN CÁC PLACEHOLDERS
+==================================================================================
+
+┌─────────────────────┬─────────────────────────────────┬───────────────────────┐
+│ Placeholder         │ Mô tả                           │ Ví dụ                 │
+├─────────────────────┼─────────────────────────────────┼───────────────────────┤
+│ {EmployeeName}      │ Tên đầy đủ nhân viên            │ Nguyễn Văn A          │
+│ {Department}        │ Tên phòng ban                   │ Phòng Kỹ thuật        │
+│ {EndDate}           │ Ngày kết thúc (định dạng)       │ 15/03/2026            │
+│ {DaysRemaining}     │ Số ngày còn lại                 │ 7                     │
+│ {BirthDate}         │ Ngày sinh (định dạng)           │ 05/03/1990            │
+│ {Age}               │ Tuổi                            │ 35                    │
+│ {CurrentMonth}      │ Tháng hiện tại                  │ 3                     │
+│ {CurrentYear}       │ Năm hiện tại                    │ 2026                  │
+│ {BirthdayList}      │ Bảng HTML danh sách sinh nhật   │ <table>...</table>    │
+│ {TotalCount}        │ Tổng số nhân viên               │ 5                     │
+└─────────────────────┴─────────────────────────────────┴───────────────────────┘
+
+
+==================================================================================
+2. PLACEHOLDERS THEO TỪNG LOẠI TEMPLATE
+==================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 1: NHẮC NHỞ THỬ VIỆC (NHÂN VIÊN)                                           │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {EmployeeName}  - Tên nhân viên                                              │
+│   • {EndDate}       - Ngày kết thúc thử việc                                     │
+│   • {DaysRemaining} - Số ngày còn lại                                            │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "[Nhắc nhở] Thử việc của Nguyễn Văn A sắp kết thúc"                            │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 2: NHẮC NHỞ HỢP ĐỒNG (NHÂN VIÊN)                                           │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {EmployeeName}  - Tên nhân viên                                              │
+│   • {EndDate}       - Ngày hết hạn hợp đồng                                      │
+│   • {DaysRemaining} - Số ngày còn lại                                            │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "[Nhắc nhở] Hợp đồng của Nguyễn Văn A sắp hết hạn"                             │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 3: CHÚC MỪNG SINH NHẬT                                                      │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {EmployeeName} - Tên nhân viên                                               │
+│   • {BirthDate}    - Ngày sinh                                                   │
+│   • {Age}          - Tuổi                                                        │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "🎂 Chúc Mừng Sinh Nhật - Nguyễn Văn A"                                        │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 4: DANH SÁCH SINH NHẬT THÁNG (GỬI HR)                                       │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {CurrentMonth}  - Tháng hiện tại                                             │
+│   • {CurrentYear}   - Năm hiện tại                                               │
+│   • {BirthdayList}  - Bảng HTML danh sách nhân viên có sinh nhật                 │
+│   • {TotalCount}    - Tổng số nhân viên có sinh nhật trong tháng                 │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "[Thông báo] Danh sách sinh nhật tháng 3/2026"                                 │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Lưu ý: {BirthdayList} là HTML table được generate tự động với format:           │
+│   <table>                                                                        │
+│     <tr><th>STT</th><th>Họ tên</th><th>Ngày sinh</th><th>Phòng ban</th></tr>     │
+│     <tr><td>1</td><td>Nguyễn Văn A</td><td>05/03</td><td>Kỹ thuật</td></tr>      │
+│     ...                                                                          │
+│   </table>                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 5: NHẮC NHỞ THỬ VIỆC (HR)                                                  │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {EmployeeName}  - Tên nhân viên                                              │
+│   • {Department}    - Tên phòng ban                                              │
+│   • {EndDate}       - Ngày kết thúc thử việc                                     │
+│   • {DaysRemaining} - Số ngày còn lại                                            │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "[Nhắc nhở Thử việc] Nguyễn Văn A - Còn 7 ngày"                                │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ TYPE 6: NHẮC NHỚ HỢP ĐỒNG (HR)                                                  │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Placeholders:                                                                    │
+│   • {EmployeeName}  - Tên nhân viên                                              │
+│   • {Department}    - Tên phòng ban                                              │
+│   • {EndDate}       - Ngày hết hạn hợp đồng                                      │
+│   • {DaysRemaining} - Số ngày còn lại                                            │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Ví dụ Subject:                                                                   │
+│   "[Nhắc nhở Hợp đồng] Nguyễn Văn A - Còn 7 ngày"                                │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+
+==================================================================================
+3. HƯỚNG DẪN SỬ DỤNG
+==================================================================================
+
+1. Chạy script SQL:
+   mysql -u root -p employee_management < seed_email_templates.sql
+
+   Hoặc chạy trực tiếp trong MySQL Workbench/phpMyAdmin
+
+2. Sau khi chạy, hệ thống sẽ có 6 mẫu email mặc định:
+   - Type 1: Nhắc nhở thử việc (gửi nhân viên)
+   - Type 2: Nhắc nhở hợp đồng (gửi nhân viên)
+   - Type 3: Chúc mừng sinh nhật
+   - Type 4: Danh sách sinh nhật tháng (gửi HR)
+   - Type 5: Nhắc nhở thử việc (gửi HR)
+   - Type 6: Nhắc nhở hợp đồng (gửi HR)
+
+3. Cách thay thế placeholder trong code C#:
+   
+   string body = template.BodyHtml
+       .Replace("{EmployeeName}", employee.FullName)
+       .Replace("{EndDate}", contract.EndDate.ToString("dd/MM/yyyy"))
+       .Replace("{DaysRemaining}", daysRemaining.ToString());
+
+4. Lưu ý quan trọng:
+   - Tất cả placeholder đều bắt đầu bằng { và kết thúc bằng }
+   - Phân biệt chữ hoa chữ thường: {EmployeeName} ≠ {employeename}
+   - Placeholder không được thay thế sẽ hiển thị nguyên văn trong email

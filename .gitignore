@@ -1,0 +1,66 @@
+# ========================
+# .NET / ASP.NET Core
+# ========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.DotSettings.user
+
+# Publish output
+publish/
+out/
+
+# NuGet packages
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Secrets & config overrides
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Logs
+Logs/
+*.log
+
+# EF Core migrations (keep migration files, ignore snapshots if desired)
+# Uncomment below to ignore migrations
+# **/Migrations/
+
+# ========================
+# Angular / Node
+# ========================
+node_modules/
+dist/
+.angular/
+.cache/
+
+# Environment files with secrets
+Frontend/employee-management/src/environments/environment.prod.ts
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# IDE
+# ========================
+.idea/
+*.swp
+*.swo
+
+# ========================
+# Data / uploads
+# ========================
+wwwroot/uploads/

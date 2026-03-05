@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmployeeManagement.Api", "EmployeeManagement.Api", "{2A8C6911-6BEB-9AB2-CF11-7807869158AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManagement.Api", "Backend\EmployeeManagement.Api\EmployeeManagement.Api\EmployeeManagement.Api.csproj", "{EAC9470A-A76D-76DD-23FD-D5624C08C127}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EAC9470A-A76D-76DD-23FD-D5624C08C127}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC9470A-A76D-76DD-23FD-D5624C08C127}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAC9470A-A76D-76DD-23FD-D5624C08C127}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAC9470A-A76D-76DD-23FD-D5624C08C127}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A8C6911-6BEB-9AB2-CF11-7807869158AF} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{EAC9470A-A76D-76DD-23FD-D5624C08C127} = {2A8C6911-6BEB-9AB2-CF11-7807869158AF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3567A143-1364-4599-99D7-247734AF895F}
+	EndGlobalSection
+EndGlobal
