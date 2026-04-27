@@ -50,4 +50,9 @@ public interface IEmployeeService
     /// Lấy danh sách file của nhân viên
     /// </summary>
     Task<List<EmployeeFileDto>> GetEmployeeFilesAsync(Guid employeeId);
+
+    /// <summary>
+    /// Download file của nhân viên
+    /// </summary>
+    Task<(Stream? FileStream, string? FileName, string? ContentType, string? Error)> DownloadFileAsync(Guid employeeId, Guid fileId);
 }

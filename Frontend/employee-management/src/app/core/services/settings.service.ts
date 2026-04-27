@@ -68,4 +68,9 @@ export class SettingsService {
   sendTestMonthlyBirthdayEmail(email: string): Observable<ApiResult<void>> {
     return this.api.post<ApiResult<void>>(`${this.endpoint}/test-monthly-birthday-email`, { email });
   }
+
+  // Kích hoạt chạy tất cả jobs ngay lập tức
+  triggerAllJobs(): Observable<ApiResult<void>> {
+    return this.api.post<ApiResult<void>>(`${this.endpoint}/trigger-jobs`, {});
+  }
 }

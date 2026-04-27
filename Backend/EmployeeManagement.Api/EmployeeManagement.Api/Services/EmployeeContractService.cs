@@ -131,6 +131,82 @@ public class EmployeeContractService : IEmployeeContractService
     }
 
     /// <summary>
+    /// Cập nhật hợp đồng (khi nhập sai thông tin)
+    /// </summary>
+    public async Task<ApiResult<EmployeeContractDto>> UpdateContractAsync(
+        Guid employeeId,
+        Guid contractId,
+        UpdateEmployeeContractDto dto,
+        Guid? userId,
+        string userName)
+    {
+        // Tìm hợp đồng
+        var contract = await _context.EmployeeContracts
+            .Include(c => c.ContractType)
+            .FirstOrDefaultAsync(c => c.Id == contractId && c.EmployeeId == employeeId);
+
+        if (contract == null)
+        {
+            return ApiResult<EmployeeContractDto>.Fail("Không tìm thấy hợp đồng");
+        }
+
+        // Kiểm tra loại hợp đồng tồn tại
+        var contractType = await _context.ContractTypes.FindAsync(dto.ContractTypeId);
+        if (contractType == null)
+        {
+            return ApiResult<EmployeeContractDto>.Fail("Loại hợp đồng không hợp lệ");
+        }
+
+        // Validate ngày
+        if (dto.EndDate.HasValue && dto.EndDate < dto.StartDate)
+        {
+            return ApiResult<EmployeeContractDto>.Fail("Ngày kết thúc phải sau ngày bắt đầu");
+        }
+
+        // Lưu thông tin cũ để ghi log
+        var oldContractTypeName = contract.ContractType?.Name ?? "Không xác định";
+        var oldStartDate = contract.StartDate;
+        var oldEndDate = contract.EndDate;
+
+        // Cập nhật thông tin
+        contract.ContractTypeId = dto.ContractTypeId;
+        contract.StartDate = dto.StartDate;
+        contract.EndDate = dto.EndDate;
+        contract.Notes = dto.Notes;
+
+        await _context.SaveChangesAsync();
+
+        // Load lại ContractType
+        contract.ContractType = contractType;
+
+        // Ghi log lịch sử
+        var changes = new List<string>();
+        if (oldContractTypeName != contractType.Name)
+            changes.Add($"Loại HĐ: {oldContractTypeName} → {contractType.Name}");
+        if (oldStartDate != dto.StartDate)
+            changes.Add($"Ngày bắt đầu: {oldStartDate:dd/MM/yyyy} → {dto.StartDate:dd/MM/yyyy}");
+        if (oldEndDate != dto.EndDate)
+            changes.Add($"Ngày kết thúc: {oldEndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn"} → {dto.EndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn"}");
+
+        if (changes.Any())
+        {
+            await _historyService.TrackChangeAsync(
+                employeeId,
+                "Contract",
+                "Chỉnh sửa hợp đồng",
+                string.Join("; ", changes.Select(c => c.Split("→")[0].Trim())),
+                string.Join("; ", changes.Select(c => c.Split("→").Last().Trim())),
+                userId,
+                userName,
+                "Update");
+        }
+
+        _logger.LogInformation("Đã cập nhật hợp đồng {ContractId} của nhân viên {EmployeeId}", contractId, employeeId);
+
+        return ApiResult<EmployeeContractDto>.Ok(MapToDto(contract));
+    }
+
+    /// <summary>
     /// Kết thúc hợp đồng (set EndDate = ngày hôm qua)
     /// </summary>
     public async Task<ApiResult<EmployeeContractDto>> TerminateContractAsync(
@@ -190,7 +266,7 @@ public class EmployeeContractService : IEmployeeContractService
             EmployeeId = contract.EmployeeId,
             ContractTypeId = contract.ContractTypeId,
             ContractTypeName = contract.ContractType?.Name ?? "Không xác định",
-            DurationMonths = contract.ContractType?.DurationMonths,
+            DurationDays = contract.ContractType?.DurationDays,
             StartDate = contract.StartDate,
             EndDate = contract.EndDate,
             Status = contract.Status,

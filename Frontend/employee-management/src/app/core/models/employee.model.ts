@@ -19,7 +19,7 @@ export interface EmployeeContract {
   employeeId: string;
   contractTypeId: string;
   contractTypeName: string;
-  durationMonths?: number;
+  durationDays?: number;
   startDate: string;
   endDate?: string;
   status: string; // "Đang thực hiện" hoặc "Đã kết thúc"
@@ -78,6 +78,14 @@ export interface UpdateEmployeeDto extends CreateEmployeeDto {}
 
 // DTO tạo hợp đồng mới
 export interface CreateEmployeeContractDto {
+  contractTypeId: string;
+  startDate: string;
+  endDate?: string;
+  notes?: string;
+}
+
+// DTO cập nhật hợp đồng (sửa sai)
+export interface UpdateEmployeeContractDto {
   contractTypeId: string;
   startDate: string;
   endDate?: string;

@@ -14,7 +14,7 @@ public class CreateContractTypeDto
     [MaxLength(200, ErrorMessage = "Ten toi da 200 ky tu")]
     public string Name { get; set; } = string.Empty;
 
-    public int? DurationMonths { get; set; }
+    public int? DurationDays { get; set; }
 
     [MaxLength(500)]
     public string? Description { get; set; }
@@ -29,7 +29,7 @@ public class UpdateContractTypeDto
     [MaxLength(200, ErrorMessage = "Ten toi da 200 ky tu")]
     public string Name { get; set; } = string.Empty;
 
-    public int? DurationMonths { get; set; }
+    public int? DurationDays { get; set; }
 
     [MaxLength(500)]
     public string? Description { get; set; }
@@ -44,7 +44,7 @@ public class ContractTypeDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int? DurationMonths { get; set; }
+    public int? DurationDays { get; set; }
     public string? Description { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }

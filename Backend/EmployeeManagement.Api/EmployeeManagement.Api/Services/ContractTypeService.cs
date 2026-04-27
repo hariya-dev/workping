@@ -40,7 +40,7 @@ public class ContractTypeService : IContractTypeService
             {
                 Id = c.Id,
                 Name = c.Name,
-                DurationMonths = c.DurationMonths,
+                DurationDays = c.DurationDays,
                 Description = c.Description,
                 IsActive = c.IsActive,
                 CreatedAt = c.CreatedAt,
@@ -64,7 +64,7 @@ public class ContractTypeService : IContractTypeService
         {
             Id = contractType.Id,
             Name = contractType.Name,
-            DurationMonths = contractType.DurationMonths,
+            DurationDays = contractType.DurationDays,
             Description = contractType.Description,
             IsActive = contractType.IsActive,
             CreatedAt = contractType.CreatedAt,
@@ -90,7 +90,7 @@ public class ContractTypeService : IContractTypeService
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
-                DurationMonths = dto.DurationMonths,
+                DurationDays = dto.DurationDays,
                 Description = dto.Description,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -105,7 +105,7 @@ public class ContractTypeService : IContractTypeService
             {
                 Id = contractType.Id,
                 Name = contractType.Name,
-                DurationMonths = contractType.DurationMonths,
+                DurationDays = contractType.DurationDays,
                 Description = contractType.Description,
                 IsActive = contractType.IsActive,
                 CreatedAt = contractType.CreatedAt,
@@ -140,7 +140,7 @@ public class ContractTypeService : IContractTypeService
             }
 
             contractType.Name = dto.Name;
-            contractType.DurationMonths = dto.DurationMonths;
+            contractType.DurationDays = dto.DurationDays;
             contractType.Description = dto.Description;
             contractType.IsActive = dto.IsActive;
             contractType.UpdatedAt = DateTime.UtcNow;

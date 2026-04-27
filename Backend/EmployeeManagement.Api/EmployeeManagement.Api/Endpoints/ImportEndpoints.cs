@@ -17,10 +17,18 @@ namespace EmployeeManagement.Api.Endpoints
 
             // Import employees from CSV
             group.MapPost("/employees", async (
-                [FromForm] IFormFile file,
+                HttpRequest request,
                 IEmployeeImportService importService,
                 ILogger<Program> logger) =>
             {
+                if (!request.HasFormContentType)
+                {
+                    return Results.BadRequest(new { Message = "Vui lòng gửi file dạng multipart/form-data" });
+                }
+
+                var form = await request.ReadFormAsync();
+                var file = form.Files.GetFile("file");
+
                 if (file == null || file.Length == 0)
                 {
                     return Results.BadRequest(new { Message = "Vui lòng chọn file CSV để import" });
@@ -56,7 +64,8 @@ namespace EmployeeManagement.Api.Endpoints
                     return Results.Problem($"Lỗi server: {ex.Message}", statusCode: 500);
                 }
             })
-            .DisableAntiforgery() // Cho phép upload file
+            .DisableAntiforgery()
+            .Accepts<IFormFile>("multipart/form-data")
             .WithName("ImportEmployees")
             .WithSummary("Import nhân viên từ file CSV")
             .WithDescription("Import dữ liệu nhân viên từ file CSV của hệ thống cũ. File phải có định dạng CSV với các cột: Id, Ten, Email, SoDienThoai, DiaChi, NgaySinh, NgayLamViecChinhThuc, LoaiHopDong, v.v.")

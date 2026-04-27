@@ -138,9 +138,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:4200",  // Angular dev server
-                "http://localhost:5000",  // Production
-                "https://localhost:5001"  // HTTPS Production
+                "http://localhost:4200",           // Angular dev server
+                "http://localhost:5000",           // Local
+                "https://localhost:5001",          // Local HTTPS
+                "https://atlink.asia",             // Production
+                "http://atlink.asia"               // Production HTTP
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -199,11 +201,10 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // =====================================================
-// TỰ ĐỘNG MIGRATE DATABASE (Development only)
+// TỰ ĐỘNG MIGRATE DATABASE
 // =====================================================
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
@@ -224,6 +225,10 @@ if (app.Environment.IsDevelopment())
 // Serilog request logging
 app.UseSerilogRequestLogging();
 
+// Khai báo sub-path khi deploy IIS dưới /workping
+app.UsePathBase("/workping");
+app.UseRouting();
+
 // Swagger UI
 if (app.Environment.IsDevelopment())
 {
@@ -235,7 +240,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Serve static files (cho file upload)
+// Serve Angular SPA - UseDefaultFiles PHẢI trước UseStaticFiles
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // CORS
@@ -272,6 +278,9 @@ app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Timestamp = Dat
     .WithTags("Health")
     .AllowAnonymous();
 
+// Fallback: trả về index.html cho Angular SPA routing (mọi route không phải /api)
+app.MapFallbackToFile("index.html");
+
 // =====================================================
 // CẤU HÌNH HANGFIRE RECURRING JOBS
 // =====================================================
@@ -280,25 +289,32 @@ app.Lifetime.ApplicationStarted.Register(() =>
 {
     Log.Information("Đang cấu hình Hangfire recurring jobs...");
 
-    // Job kiểm tra thử việc - Chạy hàng ngày lúc 8:00 AM
+    // [1] Chúc mừng sinh nhật → nhân viên - Hàng ngày lúc 8:00 AM
+    RecurringJob.AddOrUpdate<ReminderJobs>(
+        "daily-birthday-emails",
+        job => job.SendDailyBirthdayEmailsAsync(),
+        "0 8 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time") });
+
+    // [2] Danh sách sinh nhật tháng → HR - Ngày 1 hàng tháng lúc 8:00 AM
+    RecurringJob.AddOrUpdate<ReminderJobs>(
+        "monthly-birthday-list",
+        job => job.SendMonthlyBirthdayListAsync(),
+        "0 8 1 * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time") });
+
+    // [3] Thử việc sắp kết thúc → HR - Hàng ngày lúc 8:30 AM
     RecurringJob.AddOrUpdate<ReminderJobs>(
         "probation-reminder",
         job => job.CheckProbationRemindersAsync(),
-        "0 8 * * *", // Cron: 8:00 AM mỗi ngày
+        "30 8 * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time") });
 
-    // Job kiểm tra hợp đồng - Chạy hàng ngày lúc 8:30 AM
+    // [4] Hợp đồng sắp hết hạn → HR - Hàng ngày lúc 9:00 AM
     RecurringJob.AddOrUpdate<ReminderJobs>(
         "contract-reminder",
         job => job.CheckContractRemindersAsync(),
-        "30 8 * * *", // Cron: 8:30 AM mỗi ngày
-        new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time") });
-
-    // Job gửi danh sách sinh nhật - Chạy vào ngày 1 hàng tháng lúc 9:00 AM
-    RecurringJob.AddOrUpdate<ReminderJobs>(
-        "monthly-birthday",
-        job => job.SendMonthlyBirthdayListAsync(),
-        "0 9 1 * *", // Cron: 9:00 AM ngày 1 hàng tháng
+        "0 9 * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time") });
 
     Log.Information("Hangfire recurring jobs đã được cấu hình.");

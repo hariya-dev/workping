@@ -176,8 +176,8 @@ public class AppDbContext : DbContext
             {
                 Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 Name = "Thử việc 2 tháng",
-                DurationMonths = 2,
-                Description = "Hợp đồng thử việc 2 tháng theo quy định",
+                DurationDays = 60,
+                Description = "Hợp đồng thử việc 60 ngày theo quy định",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
@@ -185,26 +185,26 @@ public class AppDbContext : DbContext
             {
                 Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 Name = "Hợp đồng 6 tháng",
-                DurationMonths = 6,
-                Description = "Hợp đồng lao động có thời hạn 6 tháng",
+                DurationDays = 180,
+                Description = "Hợp đồng lao động có thời hạn 180 ngày",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
             new ContractType
             {
                 Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                Name = "Hợp đồng 12 tháng",
-                DurationMonths = 12,
-                Description = "Hợp đồng lao động có thời hạn 1 năm",
+                Name = "Hợp đồng 1 năm",
+                DurationDays = 365,
+                Description = "Hợp đồng lao động có thời hạn 365 ngày",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
             new ContractType
             {
                 Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                Name = "Hợp đồng 24 tháng",
-                DurationMonths = 24,
-                Description = "Hợp đồng lao động có thời hạn 2 năm",
+                Name = "Hợp đồng 2 năm",
+                DurationDays = 730,
+                Description = "Hợp đồng lao động có thời hạn 730 ngày",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             },
@@ -212,7 +212,7 @@ public class AppDbContext : DbContext
             {
                 Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
                 Name = "Không thời hạn",
-                DurationMonths = null,
+                DurationDays = null,
                 Description = "Hợp đồng lao động không xác định thời hạn",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow

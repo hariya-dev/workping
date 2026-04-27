@@ -3,7 +3,9 @@
 
 using EmployeeManagement.Api.DTOs;
 using EmployeeManagement.Api.Entities;
+using EmployeeManagement.Api.Jobs;
 using EmployeeManagement.Api.Services;
+using Hangfire;
 
 namespace EmployeeManagement.Api.Endpoints;
 
@@ -69,28 +71,21 @@ public static class SystemSettingEndpoints
         .WithName("UpdateSetting")
         .WithSummary("Cập nhật một cài đặt cụ thể");
 
-        // POST /api/settings/test-email - Gửi email test
+        // POST /api/settings/test-email - Gửi email test kết nối SMTP
         group.MapPost("/test-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
         {
             try
             {
                 var subject = "[Test] Kiểm tra hệ thống thông báo";
-                var body = @"
-                <html>
-                <body style='font-family: Arial, sans-serif;'>
+                var body = @"<html><body style='font-family: Arial, sans-serif;'>
                     <h2 style='color: #2563eb;'>Test gửi email thành công!</h2>
                     <p>Đây là email test từ Hệ thống Quản lý Nhân sự.</p>
                     <p>Nếu bạn nhận được email này, hệ thống thông báo đang hoạt động bình thường.</p>
                     <hr style='margin: 20px 0;'>
-                    <p style='color: #666; font-size: 12px;'>
-                        Email test từ Hệ thống Quản lý Nhân sự<br>
-                        An Tưởng Technology
-                    </p>
-                </body>
-                </html>";
+                    <p style='color: #666; font-size: 12px;'>An Tưởng Technology</p>
+                </body></html>";
 
                 await emailService.SendEmailAsync(new[] { dto.Email }, subject, body);
-                
                 logger.LogInformation("Đã gửi email test thành công đến: {Email}", dto.Email);
                 return Results.Ok(ApiResult.Ok("Đã gửi email test thành công"));
             }
@@ -101,29 +96,20 @@ public static class SystemSettingEndpoints
             }
         })
         .WithName("SendTestEmail")
-        .WithSummary("Gửi email test để kiểm tra hệ thống thông báo");
+        .WithSummary("Gửi email test kết nối SMTP");
 
-        // POST /api/settings/test-birthday-email - Test email sinh nhật (gửi cho nhân viên)
+        // POST /api/settings/test-birthday-email - [1] Test email chúc mừng sinh nhật → nhân viên
         group.MapPost("/test-birthday-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
         {
             try
             {
-                // Gửi email sinh nhật cho nhân viên (sử dụng template BirthdayWish - type 3)
-                var success = await emailService.SendBirthdayEmailAsync(
-                    dto.Email, 
-                    "Nguyễn Văn A (Nhân viên test)", 
-                    new DateOnly(1994, 2, 6)
+                await emailService.SendBirthdayEmailAsync(
+                    dto.Email,
+                    "Nguyễn Văn A (Test)",
+                    new DateOnly(1994, DateTime.Now.Month, DateTime.Now.Day)
                 );
-                
-                if (success)
-                {
-                    logger.LogInformation("Đã gửi email sinh nhật test (nhân viên) thành công đến: {Email}", dto.Email);
-                    return Results.Ok(ApiResult.Ok("Đã gửi email sinh nhật test (nhân viên) thành công. Email này sử dụng template 'Chúc mừng sinh nhật' từ database."));
-                }
-                else
-                {
-                    return Results.BadRequest(ApiResult.Fail("Gửi email sinh nhật thất bại"));
-                }
+                logger.LogInformation("Đã gửi email sinh nhật test đến: {Email}", dto.Email);
+                return Results.Ok(ApiResult.Ok("Đã gửi email sinh nhật test thành công (template BirthdayWish)"));
             }
             catch (Exception ex)
             {
@@ -132,187 +118,107 @@ public static class SystemSettingEndpoints
             }
         })
         .WithName("SendTestBirthdayEmail")
-        .WithSummary("Gửi email test sinh nhật cho nhân viên (template từ database)");
+        .WithSummary("[1] Test email chúc mừng sinh nhật gửi cho nhân viên");
 
-        // POST /api/settings/test-probation-email - Test email thử việc (gửi cho nhân viên)
-        group.MapPost("/test-probation-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
-        {
-            try
-            {
-                // Gửi email nhắc nhở thử việc cho nhân viên (sử dụng template ProbationReminder - type 1)
-                await emailService.SendProbationReminderEmailAsync(
-                    "Nguyễn Văn A (Nhân viên test)",
-                    dto.Email,
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
-                    15
-                );
-                
-                logger.LogInformation("Đã gửi email thử việc test (nhân viên) thành công đến: {Email}", dto.Email);
-                return Results.Ok(ApiResult.Ok("Đã gửi email thử việc test (nhân viên) thành công. Email này sử dụng template 'Nhắc nhở thử việc (Nhân viên)' từ database."));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Lỗi khi gửi email thử việc test đến: {Email}", dto.Email);
-                return Results.BadRequest(ApiResult.Fail($"Gửi email thử việc thất bại: {ex.Message}"));
-            }
-        })
-        .WithName("SendTestProbationEmail")
-        .WithSummary("Gửi email test nhắc nhở thử việc cho nhân viên (template từ database)");
-
-        // POST /api/settings/test-contract-email - Test email hợp đồng (gửi cho nhân viên)
-        group.MapPost("/test-contract-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
-        {
-            try
-            {
-                // Gửi email nhắc nhở hợp đồng cho nhân viên (sử dụng template ContractReminder - type 2)
-                await emailService.SendContractReminderEmailAsync(
-                    "Nguyễn Văn A (Nhân viên test)",
-                    dto.Email,
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(30)),
-                    30
-                );
-                
-                logger.LogInformation("Đã gửi email hợp đồng test (nhân viên) thành công đến: {Email}", dto.Email);
-                return Results.Ok(ApiResult.Ok("Đã gửi email hợp đồng test (nhân viên) thành công. Email này sử dụng template 'Nhắc nhở hợp đồng (Nhân viên)' từ database."));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Lỗi khi gửi email hợp đồng test đến: {Email}", dto.Email);
-                return Results.BadRequest(ApiResult.Fail($"Gửi email hợp đồng thất bại: {ex.Message}"));
-            }
-        })
-        .WithName("SendTestContractEmail")
-        .WithSummary("Gửi email test nhắc nhở hợp đồng cho nhân viên (template từ database)");
-
-        // POST /api/settings/test-probation-email-hr - Test email thử việc (gửi cho HR)
-        group.MapPost("/test-probation-email-hr", async (TestEmailDto dto, IEmailTemplateService templateService, IEmailService emailService, ILogger<IEmailService> logger) =>
-        {
-            try
-            {
-                // Sử dụng template ProbationReminderHr - type 5
-                var data = new Dictionary<string, string>
-                {
-                    ["EmployeeName"] = "Nguyễn Văn A (Nhân viên test)",
-                    ["Department"] = "Phòng Kỹ thuật",
-                    ["EndDate"] = DateOnly.FromDateTime(DateTime.Now.AddDays(15)).ToString("dd/MM/yyyy"),
-                    ["DaysRemaining"] = "15"
-                };
-
-                var template = await templateService.RenderTemplateAsync(EmailTemplateType.ProbationReminderHr, data);
-                
-                if (template.HasValue)
-                {
-                    await emailService.SendEmailAsync(new[] { dto.Email }, template.Value.Subject, template.Value.BodyHtml);
-                    logger.LogInformation("Đã gửi email thử việc test (HR) thành công đến: {Email}", dto.Email);
-                    return Results.Ok(ApiResult.Ok("Đã gửi email thử việc test (HR) thành công. Email này sử dụng template 'Nhắc nhở thử việc (HR)' từ database."));
-                }
-                else
-                {
-                    return Results.BadRequest(ApiResult.Fail("Không tìm thấy template email cho HR"));
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Lỗi khi gửi email thử việc test (HR) đến: {Email}", dto.Email);
-                return Results.BadRequest(ApiResult.Fail($"Gửi email thử việc (HR) thất bại: {ex.Message}"));
-            }
-        })
-        .WithName("SendTestProbationEmailHr")
-        .WithSummary("Gửi email test nhắc nhở thử việc cho HR (template từ database)");
-
-        // POST /api/settings/test-contract-email-hr - Test email hợp đồng (gửi cho HR)
-        group.MapPost("/test-contract-email-hr", async (TestEmailDto dto, IEmailTemplateService templateService, IEmailService emailService, ILogger<IEmailService> logger) =>
-        {
-            try
-            {
-                // Sử dụng template ContractReminderHr - type 6
-                var data = new Dictionary<string, string>
-                {
-                    ["EmployeeName"] = "Nguyễn Văn A (Nhân viên test)",
-                    ["Department"] = "Phòng Kỹ thuật",
-                    ["EndDate"] = DateOnly.FromDateTime(DateTime.Now.AddDays(30)).ToString("dd/MM/yyyy"),
-                    ["DaysRemaining"] = "30"
-                };
-
-                var template = await templateService.RenderTemplateAsync(EmailTemplateType.ContractReminderHr, data);
-                
-                if (template.HasValue)
-                {
-                    await emailService.SendEmailAsync(new[] { dto.Email }, template.Value.Subject, template.Value.BodyHtml);
-                    logger.LogInformation("Đã gửi email hợp đồng test (HR) thành công đến: {Email}", dto.Email);
-                    return Results.Ok(ApiResult.Ok("Đã gửi email hợp đồng test (HR) thành công. Email này sử dụng template 'Nhắc nhở hợp đồng (HR)' từ database."));
-                }
-                else
-                {
-                    return Results.BadRequest(ApiResult.Fail("Không tìm thấy template email cho HR"));
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Lỗi khi gửi email hợp đồng test (HR) đến: {Email}", dto.Email);
-                return Results.BadRequest(ApiResult.Fail($"Gửi email hợp đồng (HR) thất bại: {ex.Message}"));
-            }
-        })
-        .WithName("SendTestContractEmailHr")
-        .WithSummary("Gửi email test nhắc nhở hợp đồng cho HR (template từ database)");
-
-        // POST /api/settings/test-monthly-birthday-email - Test email danh sách sinh nhật tháng (HR)
-        group.MapPost("/test-monthly-birthday-email", async (TestEmailDto dto, IEmailTemplateService templateService, IEmailService emailService, ILogger<IEmailService> logger) =>
+        // POST /api/settings/test-monthly-birthday-email - [2] Test email danh sách sinh nhật tháng → HR
+        group.MapPost("/test-monthly-birthday-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
         {
             try
             {
                 var now = DateTime.Now;
-                var month = now.Month;
-                var year = now.Year;
-
-                // Dữ liệu test mẫu
                 var sampleBirthdays = new List<(string Name, DateOnly Birthday, string? Department)>
                 {
-                    ("Nguyễn Văn A", new DateOnly(1990, month, 5), "Phòng Kỹ thuật"),
-                    ("Trần Thị B", new DateOnly(1995, month, 12), "Phòng Nhân sự"),
-                    ("Lê Văn C", new DateOnly(1988, month, 20), "Phòng Kinh doanh"),
-                    ("Phạm Thị D", new DateOnly(1992, month, 25), "Phòng Kế toán")
+                    ("Nguyễn Văn A", new DateOnly(1990, now.Month, 5), "Phòng Kỹ thuật"),
+                    ("Trần Thị B", new DateOnly(1995, now.Month, 12), "Phòng Nhân sự"),
+                    ("Lê Văn C", new DateOnly(1988, now.Month, 20), "Phòng Kinh doanh"),
                 };
 
-                // Tạo bảng HTML danh sách sinh nhật
-                var birthdayRows = string.Join("", sampleBirthdays.OrderBy(b => b.Birthday.Day).Select(b => $@"
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ddd;'>{b.Birthday.Day:D2}/{month:D2}</td>
-                        <td style='padding: 8px; border: 1px solid #ddd;'>{b.Name}</td>
-                        <td style='padding: 8px; border: 1px solid #ddd;'>{b.Department ?? "-"}</td>
-                        <td style='padding: 8px; border: 1px solid #ddd;'>{year - b.Birthday.Year} tuổi</td>
-                    </tr>"));
+                await emailService.SendBirthdayListEmailAsync(
+                    new[] { dto.Email },
+                    sampleBirthdays,
+                    now.Month, now.Year);
 
-                // Sử dụng template MonthlyBirthdayList - type 4
-                var data = new Dictionary<string, string>
-                {
-                    ["CurrentMonth"] = month.ToString(),
-                    ["CurrentYear"] = year.ToString(),
-                    ["BirthdayList"] = $"<table width='100%' style='width: 100%; border-collapse: collapse; margin: 10px 0;'><thead><tr style='background: #ff6b6b; color: white;'><th style='padding: 10px; border: 1px solid #ddd; text-align: left;'>Ngày</th><th style='padding: 10px; border: 1px solid #ddd; text-align: left;'>Họ tên</th><th style='padding: 10px; border: 1px solid #ddd; text-align: left;'>Phòng ban</th><th style='padding: 10px; border: 1px solid #ddd; text-align: left;'>Tuổi</th></tr></thead><tbody>{birthdayRows}</tbody></table>",
-                    ["TotalCount"] = sampleBirthdays.Count.ToString()
-                };
-
-                var template = await templateService.RenderTemplateAsync(EmailTemplateType.MonthlyBirthdayList, data);
-                
-                if (template.HasValue)
-                {
-                    await emailService.SendEmailAsync(new[] { dto.Email }, template.Value.Subject, template.Value.BodyHtml);
-                    logger.LogInformation("Đã gửi email danh sách sinh nhật tháng test (HR) thành công đến: {Email}", dto.Email);
-                    return Results.Ok(ApiResult.Ok("Đã gửi email danh sách sinh nhật tháng test (HR) thành công. Email này sử dụng template 'Danh sách sinh nhật tháng' từ database."));
-                }
-                else
-                {
-                    return Results.BadRequest(ApiResult.Fail("Không tìm thấy template email danh sách sinh nhật tháng"));
-                }
+                logger.LogInformation("Đã gửi email danh sách sinh nhật tháng test đến: {Email}", dto.Email);
+                return Results.Ok(ApiResult.Ok("Đã gửi email danh sách sinh nhật tháng test thành công (template MonthlyBirthdayList)"));
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Lỗi khi gửi email danh sách sinh nhật tháng test đến: {Email}", dto.Email);
-                return Results.BadRequest(ApiResult.Fail($"Gửi email danh sách sinh nhật tháng thất bại: {ex.Message}"));
+                return Results.BadRequest(ApiResult.Fail($"Gửi email thất bại: {ex.Message}"));
             }
         })
         .WithName("SendTestMonthlyBirthdayEmail")
-        .WithSummary("Gửi email test danh sách sinh nhật tháng cho HR (template từ database)");
+        .WithSummary("[2] Test email danh sách sinh nhật tháng gửi cho HR");
+
+        // POST /api/settings/test-probation-email - [3] Test email nhắc nhở thử việc → HR
+        group.MapPost("/test-probation-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
+        {
+            try
+            {
+                await emailService.SendProbationReminderHrEmailAsync(
+                    new[] { dto.Email },
+                    "Nguyễn Văn A (Test)",
+                    "Phòng Kỹ thuật",
+                    DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
+                    15
+                );
+                logger.LogInformation("Đã gửi email nhắc nhở thử việc test đến: {Email}", dto.Email);
+                return Results.Ok(ApiResult.Ok("Đã gửi email nhắc nhở thử việc test thành công (template ProbationReminderHr)"));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi khi gửi email nhắc nhở thử việc test đến: {Email}", dto.Email);
+                return Results.BadRequest(ApiResult.Fail($"Gửi email thất bại: {ex.Message}"));
+            }
+        })
+        .WithName("SendTestProbationEmail")
+        .WithSummary("[3] Test email nhắc nhở thử việc gửi cho HR");
+
+        // POST /api/settings/test-contract-email - [4] Test email nhắc nhở hợp đồng → HR
+        group.MapPost("/test-contract-email", async (TestEmailDto dto, IEmailService emailService, ILogger<IEmailService> logger) =>
+        {
+            try
+            {
+                await emailService.SendContractReminderHrEmailAsync(
+                    new[] { dto.Email },
+                    "Nguyễn Văn A (Test)",
+                    "Phòng Kỹ thuật",
+                    DateOnly.FromDateTime(DateTime.Now.AddDays(30)),
+                    30
+                );
+                logger.LogInformation("Đã gửi email nhắc nhở hợp đồng test đến: {Email}", dto.Email);
+                return Results.Ok(ApiResult.Ok("Đã gửi email nhắc nhở hợp đồng test thành công (template ContractReminderHr)"));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi khi gửi email nhắc nhở hợp đồng test đến: {Email}", dto.Email);
+                return Results.BadRequest(ApiResult.Fail($"Gửi email thất bại: {ex.Message}"));
+            }
+        })
+        .WithName("SendTestContractEmail")
+        .WithSummary("[4] Test email nhắc nhở hợp đồng gửi cho HR");
+
+        // POST /api/settings/trigger-jobs - Kích hoạt chạy tất cả jobs ngay lập tức
+        group.MapPost("/trigger-jobs", async (IBackgroundJobClient backgroundJob, ILogger<IEmailService> logger) =>
+        {
+            try
+            {
+                backgroundJob.Enqueue<ReminderJobs>(j => j.SendDailyBirthdayEmailsAsync());
+                backgroundJob.Enqueue<ReminderJobs>(j => j.SendMonthlyBirthdayListAsync());
+                backgroundJob.Enqueue<ReminderJobs>(j => j.CheckProbationRemindersAsync());
+                backgroundJob.Enqueue<ReminderJobs>(j => j.CheckContractRemindersAsync());
+
+                logger.LogInformation("Đã kích hoạt chạy tất cả 4 jobs thủ công");
+                return Results.Ok(ApiResult.Ok("Đã kích hoạt chạy tất cả jobs. Hệ thống sẽ xử lý ngay."));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi khi kích hoạt jobs thủ công");
+                return Results.BadRequest(ApiResult.Fail($"Kích hoạt jobs thất bại: {ex.Message}"));
+            }
+        })
+        .WithName("TriggerAllJobs")
+        .WithSummary("Kích hoạt chạy tất cả background jobs ngay lập tức");
     }
 }
 

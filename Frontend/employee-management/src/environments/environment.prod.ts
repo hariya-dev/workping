@@ -3,7 +3,7 @@
 
 export const environment = {
   production: true,
-  apiUrl: 'https://api.yourcompany.com',
+  apiUrl: 'https://atlink.asia/workping',
   appName: 'He thong Quan ly Nhan su',
   companyName: 'An Tuong Technology'
 };

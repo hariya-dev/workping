@@ -27,6 +27,11 @@ public interface IEmployeeContractService
     Task<ApiResult<EmployeeContractDto>> CreateContractAsync(Guid employeeId, CreateEmployeeContractDto dto, Guid? userId, string userName);
 
     /// <summary>
+    /// Cập nhật hợp đồng (khi nhập sai thông tin)
+    /// </summary>
+    Task<ApiResult<EmployeeContractDto>> UpdateContractAsync(Guid employeeId, Guid contractId, UpdateEmployeeContractDto dto, Guid? userId, string userName);
+
+    /// <summary>
     /// Kết thúc hợp đồng (set EndDate = ngày hôm qua)
     /// </summary>
     Task<ApiResult<EmployeeContractDto>> TerminateContractAsync(Guid employeeId, Guid contractId, TerminateContractDto? dto, Guid? userId, string userName);

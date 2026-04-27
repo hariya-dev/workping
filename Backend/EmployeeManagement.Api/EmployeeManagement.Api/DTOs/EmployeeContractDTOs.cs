@@ -60,9 +60,9 @@ public class EmployeeContractDto
     public string ContractTypeName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Thời hạn hợp đồng (số tháng)
+    /// Thời hạn hợp đồng (số ngày)
     /// </summary>
-    public int? DurationMonths { get; set; }
+    public int? DurationDays { get; set; }
 
     /// <summary>
     /// Ngày bắt đầu
@@ -94,6 +94,35 @@ public class EmployeeContractDto
     /// Tên người tạo
     /// </summary>
     public string? CreatedByName { get; set; }
+}
+
+/// <summary>
+/// DTO cập nhật hợp đồng (khi nhập sai thông tin)
+/// </summary>
+public class UpdateEmployeeContractDto
+{
+    /// <summary>
+    /// ID loại hợp đồng
+    /// </summary>
+    [Required(ErrorMessage = "Loại hợp đồng là bắt buộc")]
+    public Guid ContractTypeId { get; set; }
+
+    /// <summary>
+    /// Ngày bắt đầu hợp đồng
+    /// </summary>
+    [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc")]
+    public DateOnly StartDate { get; set; }
+
+    /// <summary>
+    /// Ngày kết thúc hợp đồng (null = không thời hạn)
+    /// </summary>
+    public DateOnly? EndDate { get; set; }
+
+    /// <summary>
+    /// Ghi chú về hợp đồng
+    /// </summary>
+    [MaxLength(1000)]
+    public string? Notes { get; set; }
 }
 
 /// <summary>

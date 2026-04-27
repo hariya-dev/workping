@@ -27,9 +27,9 @@ public class ContractType
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Số tháng của hợp đồng (null = không thời hạn)
+    /// Số ngày của hợp đồng (null = không thời hạn)
     /// </summary>
-    public int? DurationMonths { get; set; }
+    public int? DurationDays { get; set; }
 
     /// <summary>
     /// Mô tả chi tiết loại hợp đồng

@@ -13,6 +13,7 @@ import {
   EmployeeEditHistory,
   EmployeeContract,
   CreateEmployeeContractDto,
+  UpdateEmployeeContractDto,
   TerminateContractDto
 } from '../models';
 import { ApiResult, PagedResult } from '../models/api-result.model';
@@ -67,6 +68,14 @@ export class EmployeeService {
   // Tạo hợp đồng mới
   createContract(employeeId: string, dto: CreateEmployeeContractDto): Observable<ApiResult<EmployeeContract>> {
     return this.api.post<ApiResult<EmployeeContract>>(`${this.endpoint}/${employeeId}/contracts`, dto);
+  }
+
+  // Cập nhật hợp đồng (sửa sai)
+  updateContract(employeeId: string, contractId: string, dto: UpdateEmployeeContractDto): Observable<ApiResult<EmployeeContract>> {
+    return this.api.put<ApiResult<EmployeeContract>>(
+      `${this.endpoint}/${employeeId}/contracts/${contractId}`,
+      dto
+    );
   }
 
   // Kết thúc hợp đồng

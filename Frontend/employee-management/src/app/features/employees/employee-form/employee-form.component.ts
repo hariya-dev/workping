@@ -307,7 +307,7 @@ export class EmployeeFormComponent implements OnInit {
           if (emp.probationStartDate && emp.probationEndDate) {
             const start = new Date(emp.probationStartDate);
             const end = new Date(emp.probationEndDate);
-            this.probationDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            this.probationDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
           }
         }
         this.loading.set(false);
@@ -325,7 +325,7 @@ export class EmployeeFormComponent implements OnInit {
     const days = this.probationDays || this.defaultProbationDays();
     const startDate = new Date(this.formData.probationStartDate);
     const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + days);
+    endDate.setDate(endDate.getDate() + days - 1);
     
     this.formData.probationEndDate = endDate.toISOString().split('T')[0];
   }

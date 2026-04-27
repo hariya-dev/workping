@@ -47,7 +47,7 @@ import { ContractType, CreateContractTypeDto, UpdateContractTypeDto } from '../.
                     <div>
                       <h3 class="font-semibold text-gray-900">{{ type.name }}</h3>
                       <p class="text-sm text-gray-500">
-                        {{ type.durationMonths ? type.durationMonths + ' tháng' : 'Không thời hạn' }}
+                        {{ type.durationDays ? type.durationDays + ' ngày' : 'Không thời hạn' }}
                       </p>
                     </div>
                   </div>
@@ -139,10 +139,10 @@ import { ContractType, CreateContractTypeDto, UpdateContractTypeDto } from '../.
                        class="form-input" placeholder="VD: Hợp đồng thử việc">
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Thời hạn (tháng)</label>
-                <input type="number" [(ngModel)]="formData.durationMonths" name="durationMonths" min="1" 
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Thời hạn (ngày)</label>
+                <input type="number" [(ngModel)]="formData.durationDays" name="durationDays" min="1" 
                        class="form-input" placeholder="Để trống = Không thời hạn">
-                <p class="text-xs text-gray-500 mt-1">Để trống nếu là hợp đồng không xác định thời hạn</p>
+                <p class="text-xs text-gray-500 mt-1">Để trống nếu là hợp đồng không xác định thời hạn. VD: 365 = 1 năm</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Mô tả</label>
@@ -186,7 +186,7 @@ export class ContractTypeListComponent implements OnInit {
 
   formData: CreateContractTypeDto & { isActive?: boolean } = {
     name: '',
-    durationMonths: undefined,
+    durationDays: undefined,
     description: '',
     isActive: true
   };
@@ -215,13 +215,13 @@ export class ContractTypeListComponent implements OnInit {
       this.editingType.set(type);
       this.formData = {
         name: type.name,
-        durationMonths: type.durationMonths,
+        durationDays: type.durationDays,
         description: type.description || '',
         isActive: type.isActive
       };
     } else {
       this.editingType.set(null);
-      this.formData = { name: '', durationMonths: undefined, description: '', isActive: true };
+      this.formData = { name: '', durationDays: undefined, description: '', isActive: true };
     }
     this.showModal.set(true);
   }

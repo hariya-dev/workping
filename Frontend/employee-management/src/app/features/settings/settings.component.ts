@@ -124,22 +124,6 @@ import { ReminderSettings, ChangePasswordDto } from '../../core/models';
 
             <!-- Test buttons grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <!-- Basic test email -->
-              <button type="button" (click)="sendTestEmail()" [disabled]="sendingTestEmail() || !testEmail" 
-                      class="btn-secondary flex items-center justify-center">
-                @if (sendingTestEmail()) {
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                  Đang gửi...
-                } @else {
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                  Test Email Cơ Bản
-                }
-              </button>
 
               <!-- Birthday test email -->
               <button type="button" (click)="sendTestBirthdayEmail()" [disabled]="sendingBirthdayTest() || !testEmail" 
@@ -295,6 +279,58 @@ import { ReminderSettings, ChangePasswordDto } from '../../core/models';
             }
           </div>
 
+          <!-- Kích hoạt Jobs thủ công -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Kích hoạt jobs thủ công</h3>
+                <p class="text-sm text-gray-500">Chạy ngay tất cả jobs gửi mail — dùng khi cần kiểm tra hoặc khắc phục sự cố</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <button type="button" (click)="triggerAllJobs()" [disabled]="triggeringJobs()"
+                      class="btn-primary flex items-center">
+                @if (triggeringJobs()) {
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Đang kích hoạt...
+                } @else {
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  Chạy tất cả jobs ngay
+                }
+              </button>
+
+              <span class="text-xs text-gray-500">Gồm: Sinh nhật hôm nay · DS sinh nhật tháng · Thử việc · Hợp đồng</span>
+            </div>
+
+            @if (triggerJobsSuccess()) {
+              <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-600 flex items-center">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                {{ triggerJobsSuccess() }}
+              </div>
+            }
+            @if (triggerJobsError()) {
+              <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ triggerJobsError() }}
+              </div>
+            }
+          </div>
+
           <!-- Lưu ý -->
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div class="flex">
@@ -370,16 +406,23 @@ export class SettingsComponent implements OnInit {
   birthdayTestSuccess = signal('');
   birthdayTestError = signal('');
 
-  // Test email types (HR)
-  sendingProbationTestHr = signal(false);
-  sendingContractTestHr = signal(false);
+  // Test monthly birthday list email for HR
   sendingMonthlyBirthdayTest = signal(false);
-  probationTestHrSuccess = signal('');
-  contractTestHrSuccess = signal('');
   monthlyBirthdayTestSuccess = signal('');
-  probationTestHrError = signal('');
-  contractTestHrError = signal('');
   monthlyBirthdayTestError = signal('');
+
+  // Test HR emails
+  sendingProbationTestHr = signal(false);
+  probationTestHrSuccess = signal('');
+  probationTestHrError = signal('');
+  sendingContractTestHr = signal(false);
+  contractTestHrSuccess = signal('');
+  contractTestHrError = signal('');
+
+  // Trigger all jobs
+  triggeringJobs = signal(false);
+  triggerJobsSuccess = signal('');
+  triggerJobsError = signal('');
 
   settings: ReminderSettings = {
     defaultProbationDays: 60,
@@ -562,6 +605,28 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.sendingMonthlyBirthdayTest.set(false);
         this.monthlyBirthdayTestError.set('Không thể gửi email danh sách sinh nhật tháng test.');
+      }
+    });
+  }
+
+  triggerAllJobs(): void {
+    this.triggerJobsSuccess.set('');
+    this.triggerJobsError.set('');
+    this.triggeringJobs.set(true);
+
+    this.settingsService.triggerAllJobs().subscribe({
+      next: (result) => {
+        this.triggeringJobs.set(false);
+        if (result.success) {
+          this.triggerJobsSuccess.set('Đã kích hoạt tất cả jobs. Hệ thống đang xử lý trong nền.');
+          setTimeout(() => this.triggerJobsSuccess.set(''), 6000);
+        } else {
+          this.triggerJobsError.set(result.message || 'Kích hoạt jobs thất bại');
+        }
+      },
+      error: () => {
+        this.triggeringJobs.set(false);
+        this.triggerJobsError.set('Không thể kích hoạt jobs. Vui lòng thử lại.');
       }
     });
   }

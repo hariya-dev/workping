@@ -80,6 +80,41 @@ public static class EmployeeContractEndpoints
         .WithName("CreateEmployeeContract")
         .WithSummary("Tạo hợp đồng mới cho nhân viên (chỉ được phép 1 hợp đồng đang thực hiện)");
 
+        // PUT /api/employees/{employeeId}/contracts/{contractId} - Cập nhật hợp đồng
+        group.MapPut("/{contractId:guid}", async (
+            Guid employeeId,
+            Guid contractId,
+            UpdateEmployeeContractDto dto,
+            IEmployeeContractService service,
+            HttpContext httpContext) =>
+        {
+            Guid? userId = null;
+            string userName = "Hệ thống";
+            
+            var userIdClaim = httpContext.User.FindFirst("sub") ?? httpContext.User.FindFirst("userId");
+            var userNameClaim = httpContext.User.FindFirst("name") ?? httpContext.User.FindFirst("fullName");
+            
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+            if (userNameClaim != null)
+            {
+                userName = userNameClaim.Value;
+            }
+
+            var result = await service.UpdateContractAsync(employeeId, contractId, dto, userId, userName);
+            
+            if (!result.Success)
+            {
+                return Results.BadRequest(result);
+            }
+            
+            return Results.Ok(result);
+        })
+        .WithName("UpdateEmployeeContract")
+        .WithSummary("Cập nhật thông tin hợp đồng (khi nhập sai)");
+
         // PUT /api/employees/{employeeId}/contracts/{contractId}/terminate - Kết thúc hợp đồng
         group.MapPut("/{contractId:guid}/terminate", async (
             Guid employeeId, 

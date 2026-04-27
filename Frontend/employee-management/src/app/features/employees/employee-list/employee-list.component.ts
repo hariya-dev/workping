@@ -4,7 +4,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ContractTypeService } from '../../../core/services/contract-type.service';
 import { Employee, EmployeeFilter, EmployeeStatus, EmployeeStatusLabels, ContractType } from '../../../core/models';
@@ -167,7 +167,8 @@ export class EmployeeListComponent implements OnInit {
 
   constructor(
     private employeeService: EmployeeService,
-    private contractTypeService: ContractTypeService
+    private contractTypeService: ContractTypeService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -239,12 +240,10 @@ export class EmployeeListComponent implements OnInit {
   // ========== CARD EVENT HANDLERS ==========
   
   onViewDetail(employeeId: string): void {
-    // Navigate to employee detail page
-    window.location.href = `/employees/${employeeId}`;
+    this.router.navigate(['/employees', employeeId]);
   }
 
   onEdit(employeeId: string): void {
-    // Navigate to employee edit page
-    window.location.href = `/employees/${employeeId}/edit`;
+    this.router.navigate(['/employees', employeeId, 'edit']);
   }
 }

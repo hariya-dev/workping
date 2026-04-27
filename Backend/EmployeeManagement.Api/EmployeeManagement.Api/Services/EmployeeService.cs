@@ -426,6 +426,61 @@ public class EmployeeService : IEmployeeService
     }
 
     /// <summary>
+    /// Download file của nhân viên
+    /// </summary>
+    public async Task<(Stream? FileStream, string? FileName, string? ContentType, string? Error)> DownloadFileAsync(Guid employeeId, Guid fileId)
+    {
+        try
+        {
+            var file = await _context.EmployeeFiles
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.EmployeeId == employeeId);
+
+            if (file == null)
+            {
+                return (null, null, null, "Không tìm thấy file");
+            }
+
+            var fullPath = Path.Combine(_environment.WebRootPath, file.FilePath);
+            if (!File.Exists(fullPath))
+            {
+                return (null, null, null, "File không tồn tại trên server");
+            }
+
+            var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var contentType = file.ContentType ?? GetContentType(file.FileExtension);
+
+            _logger.LogInformation("Download file: {FileId} của nhân viên {EmployeeId}", fileId, employeeId);
+
+            return (fileStream, file.OriginalFileName, contentType, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi download file: {FileId}", fileId);
+            return (null, null, null, "Lỗi khi download file");
+        }
+    }
+
+    /// <summary>
+    /// Lấy Content-Type theo extension
+    /// </summary>
+    private static string GetContentType(string? extension)
+    {
+        return extension?.ToLower() switch
+        {
+            ".pdf" => "application/pdf",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xls" => "application/vnd.ms-excel",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".txt" => "text/plain",
+            _ => "application/octet-stream"
+        };
+    }
+
+    /// <summary>
     /// Chuyển đổi Employee entity sang DTO
     /// </summary>
     private static EmployeeDto MapToDto(Employee e, DateOnly today)
@@ -458,7 +513,7 @@ public class EmployeeService : IEmployeeService
                 EmployeeId = activeContract.EmployeeId,
                 ContractTypeId = activeContract.ContractTypeId,
                 ContractTypeName = activeContract.ContractType?.Name ?? "Không xác định",
-                DurationMonths = activeContract.ContractType?.DurationMonths,
+                DurationDays = activeContract.ContractType?.DurationDays,
                 StartDate = activeContract.StartDate,
                 EndDate = activeContract.EndDate,
                 Status = activeContract.Status,

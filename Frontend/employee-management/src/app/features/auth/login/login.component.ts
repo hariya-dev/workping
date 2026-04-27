@@ -13,14 +13,14 @@ import { LoginDto } from '../../../core/models';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full">
-        <!-- Logo & Title -->
+        <!-- Logo -->
         <div class="text-center mb-8">
           <div class="w-32 h-32 bg-white rounded-2xl shadow-lg mx-auto flex items-center justify-center mb-4 p-2">
-            <img 
-              src="https://atpro.com.vn/wp-content/uploads/2025/12/logo-tet-2026.png" 
-              alt="An Tường Technology" 
+            <img
+              src="https://atpro.com.vn/wp-content/uploads/2025/12/logo-tet-2026.png"
+              alt="An Tường Technology"
               class="w-full h-full object-contain"
               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="hidden w-full h-full items-center justify-center">
@@ -29,8 +29,6 @@ import { LoginDto } from '../../../core/models';
               </svg>
             </div>
           </div>
-          <h1 class="text-3xl font-bold text-white">Work Ping</h1>
-
         </div>
 
         <!-- Login Form -->

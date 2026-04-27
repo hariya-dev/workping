@@ -158,6 +158,26 @@ public static class EmployeeEndpoints
         .WithName("DeleteEmployeeFile")
         .WithSummary("Xóa file của nhân viên");
 
+        // GET /api/employees/{employeeId}/files/{fileId}/download - Download file
+        group.MapGet("/{employeeId:guid}/files/{fileId:guid}/download", async (Guid employeeId, Guid fileId, IEmployeeService service) =>
+        {
+            var (fileStream, fileName, contentType, error) = await service.DownloadFileAsync(employeeId, fileId);
+
+            if (error != null)
+            {
+                return Results.NotFound(ApiResult.Fail(error));
+            }
+
+            if (fileStream == null)
+            {
+                return Results.NotFound(ApiResult.Fail("Không tìm thấy file"));
+            }
+
+            return Results.File(fileStream, contentType, fileName);
+        })
+        .WithName("DownloadEmployeeFile")
+        .WithSummary("Download file của nhân viên");
+
         // GET /api/employees/{id}/history - Lấy lịch sử chỉnh sửa nhân viên
         group.MapGet("/{id:guid}/history", async (Guid id, IEmployeeHistoryService historyService) =>
         {

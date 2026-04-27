@@ -4,7 +4,7 @@
 export interface ContractType {
   id: string;
   name: string;
-  durationMonths?: number;
+  durationDays?: number;
   description?: string;
   isActive: boolean;
   createdAt: string;
@@ -13,7 +13,7 @@ export interface ContractType {
 
 export interface CreateContractTypeDto {
   name: string;
-  durationMonths?: number;
+  durationDays?: number;
   description?: string;
 }
 

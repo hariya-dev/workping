@@ -60,6 +60,14 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "deployUrl": "/workping/",
+              "baseHref": "/workping/",
               "budgets": [
                 {
                   "type": "initial",

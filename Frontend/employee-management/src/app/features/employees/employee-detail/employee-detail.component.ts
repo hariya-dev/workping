@@ -14,6 +14,7 @@ import {
   EmployeeStatus, 
   EmployeeContract,
   CreateEmployeeContractDto,
+  UpdateEmployeeContractDto,
   ContractType
 } from '../../../core/models';
 
@@ -334,7 +335,7 @@ import {
                           </div>
                           <div class="flex justify-between sm:block">
                             <span class="text-gray-500">Thời hạn:</span>
-                            <span class="sm:ml-1 font-medium">{{ contract.durationMonths ? contract.durationMonths + ' tháng' : 'Không thời hạn' }}</span>
+                            <span class="sm:ml-1 font-medium">{{ contract.durationDays ? contract.durationDays + ' ngày' : 'Không thời hạn' }}</span>
                           </div>
                           <div class="flex justify-between sm:block">
                             <span class="text-gray-500">Tạo lúc:</span>
@@ -345,12 +346,18 @@ import {
                           <p class="mt-2 text-sm text-gray-600">{{ contract.notes }}</p>
                         }
                       </div>
-                      @if (contract.status === 'Đang thực hiện') {
-                        <button (click)="confirmTerminateContract(contract)"
-                                class="w-full sm:w-auto sm:ml-4 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 sm:border-0">
-                          Kết thúc HĐ
+                      <div class="flex gap-2 sm:ml-4">
+                        <button (click)="openEditContractModal(contract)"
+                                class="w-full sm:w-auto px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 sm:border-0">
+                          Sửa HĐ
                         </button>
-                      }
+                        @if (contract.status === 'Đang thực hiện') {
+                          <button (click)="confirmTerminateContract(contract)"
+                                  class="w-full sm:w-auto px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 sm:border-0">
+                            Kết thúc HĐ
+                          </button>
+                        }
+                      </div>
                     </div>
                   </div>
                 }
@@ -557,7 +564,7 @@ import {
                   <option value="">-- Chọn loại hợp đồng --</option>
                   @for (type of contractTypes(); track type.id) {
                     <option [value]="type.id">
-                      {{ type.name }} {{ type.durationMonths ? '(' + type.durationMonths + ' tháng)' : '(Không thời hạn)' }}
+                      {{ type.name }} {{ type.durationDays ? '(' + type.durationDays + ' ngày)' : '(Không thời hạn)' }}
                     </option>
                   }
                 </select>
@@ -573,9 +580,9 @@ import {
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1.5">Ngày kết thúc</label>
                   <input type="date" [(ngModel)]="newContract.endDate" class="form-input"
-                         [class.bg-gray-50]="selectedContractType()?.durationMonths">
-                  @if (selectedContractType()?.durationMonths) {
-                    <p class="text-xs text-primary-600 mt-1">Tự động tính theo loại HĐ</p>
+                         [class.bg-gray-50]="selectedContractType()?.durationDays">
+                  @if (selectedContractType()?.durationDays) {
+                    <p class="text-xs text-primary-600 mt-1">Tự động tính theo loại HĐ ({{ selectedContractType()?.durationDays }} ngày)</p>
                   }
                 </div>
               </div>
@@ -666,6 +673,81 @@ import {
         </div>
       </div>
     }
+
+    <!-- Edit Contract Modal -->
+    @if (showEditContractModal()) {
+      <div class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" (click)="showEditContractModal.set(false)">
+        <div class="bg-white rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg sm:mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+          <div class="sticky top-0 bg-white p-4 sm:p-6 border-b border-gray-200 z-10">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Chỉnh sửa hợp đồng</h3>
+                <p class="text-sm text-gray-500 mt-0.5 hidden sm:block">Sửa thông tin hợp đồng khi nhập sai</p>
+              </div>
+              <button (click)="showEditContractModal.set(false)" class="sm:hidden p-2 -mr-2 text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="p-4 sm:p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                Loại hợp đồng <span class="text-red-500">*</span>
+              </label>
+              <select [(ngModel)]="editContract.contractTypeId" class="form-input"
+                      (change)="onEditContractTypeChange()">
+                <option value="">-- Chọn loại hợp đồng --</option>
+                @for (type of contractTypes(); track type.id) {
+                  <option [value]="type.id">
+                    {{ type.name }} {{ type.durationDays ? '(' + type.durationDays + ' ngày)' : '(Không thời hạn)' }}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                  Ngày bắt đầu <span class="text-red-500">*</span>
+                </label>
+                <input type="date" [(ngModel)]="editContract.startDate" 
+                       (change)="calculateEditContractEndDate()" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Ngày kết thúc</label>
+                <input type="date" [(ngModel)]="editContract.endDate" class="form-input">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Ghi chú</label>
+              <textarea [(ngModel)]="editContract.notes" rows="3" class="form-input"
+                        placeholder="Nhập ghi chú (nếu có)..."></textarea>
+            </div>
+            @if (editContractError()) {
+              <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                {{ editContractError() }}
+              </div>
+            }
+          </div>
+          <div class="sticky bottom-0 bg-white p-4 sm:p-6 border-t border-gray-200 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
+            <button (click)="showEditContractModal.set(false)" class="btn-secondary w-full sm:w-auto">Hủy</button>
+            <button (click)="updateContract()" class="btn-primary w-full sm:w-auto" 
+                    [disabled]="editContractSaving() || !editContract.contractTypeId || !editContract.startDate">
+              @if (editContractSaving()) {
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Đang lưu...
+              } @else {
+                Cập nhật hợp đồng
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   `
 })
 export class EmployeeDetailComponent implements OnInit {
@@ -689,7 +771,20 @@ export class EmployeeDetailComponent implements OnInit {
   terminatingContract = signal(false);
   activeTab = signal<'info' | 'contracts' | 'documents' | 'history'>('info');
 
+  // Edit contract state
+  showEditContractModal = signal(false);
+  editContractSaving = signal(false);
+  editContractError = signal('');
+  editingContractId = '';
+
   newContract: CreateEmployeeContractDto = {
+    contractTypeId: '',
+    startDate: '',
+    endDate: '',
+    notes: ''
+  };
+
+  editContract: UpdateEmployeeContractDto = {
     contractTypeId: '',
     startDate: '',
     endDate: '',
@@ -895,14 +990,14 @@ export class EmployeeDetailComponent implements OnInit {
     if (!this.newContract.startDate || !this.newContract.contractTypeId) return;
     
     const contractType = this.selectedContractType();
-    if (!contractType || !contractType.durationMonths) {
+    if (!contractType || !contractType.durationDays) {
       this.newContract.endDate = '';
       return;
     }
     
     const startDate = new Date(this.newContract.startDate);
     const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + contractType.durationMonths);
+    endDate.setDate(endDate.getDate() + contractType.durationDays - 1);
     
     this.newContract.endDate = endDate.toISOString().split('T')[0];
   }
@@ -983,5 +1078,78 @@ export class EmployeeDetailComponent implements OnInit {
       notes: ''
     };
     this.contractError.set('');
+  }
+
+  // ========== EDIT CONTRACT ==========
+
+  openEditContractModal(contract: EmployeeContract): void {
+    this.editingContractId = contract.id;
+    this.editContract = {
+      contractTypeId: contract.contractTypeId,
+      startDate: contract.startDate,
+      endDate: contract.endDate || '',
+      notes: contract.notes || ''
+    };
+    this.editContractError.set('');
+    this.loadContractTypes();
+    this.showEditContractModal.set(true);
+  }
+
+  selectedEditContractType(): ContractType | null {
+    if (!this.editContract.contractTypeId) return null;
+    return this.contractTypes().find(t => t.id === this.editContract.contractTypeId) || null;
+  }
+
+  onEditContractTypeChange(): void {
+    this.calculateEditContractEndDate();
+  }
+
+  calculateEditContractEndDate(): void {
+    if (!this.editContract.startDate || !this.editContract.contractTypeId) return;
+    
+    const contractType = this.selectedEditContractType();
+    if (!contractType || !contractType.durationDays) {
+      this.editContract.endDate = '';
+      return;
+    }
+    
+    const startDate = new Date(this.editContract.startDate);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + contractType.durationDays - 1);
+    
+    this.editContract.endDate = endDate.toISOString().split('T')[0];
+  }
+
+  updateContract(): void {
+    if (!this.editContract.contractTypeId || !this.editContract.startDate) return;
+    
+    this.editContractSaving.set(true);
+    this.editContractError.set('');
+    
+    const dto: UpdateEmployeeContractDto = {
+      contractTypeId: this.editContract.contractTypeId,
+      startDate: this.editContract.startDate,
+      endDate: this.editContract.endDate || undefined,
+      notes: this.editContract.notes || undefined
+    };
+    
+    this.employeeService.updateContract(this.employeeId, this.editingContractId, dto).subscribe({
+      next: (result) => {
+        this.editContractSaving.set(false);
+        if (result.success && result.data) {
+          this.contracts.update(current =>
+            current.map(c => c.id === this.editingContractId ? result.data! : c)
+          );
+          this.showEditContractModal.set(false);
+          this.loadEmployee();
+        } else {
+          this.editContractError.set(result.message || 'Có lỗi xảy ra');
+        }
+      },
+      error: () => {
+        this.editContractSaving.set(false);
+        this.editContractError.set('Không thể cập nhật hợp đồng. Vui lòng thử lại.');
+      }
+    });
   }
 }
